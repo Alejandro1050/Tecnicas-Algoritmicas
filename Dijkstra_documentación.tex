@@ -1,0 +1,160 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{listings} % Para insertar código
+\usepackage{xcolor} % Para colores en el código
+\usepackage{graphicx}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    captionpos=b
+}
+
+\begin{document}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{image.png}
+    \label{fig:enter-label}
+\end{figure}
+
+\title{Algoritmo de Dijkstra: Teoría e Implementación}
+\author{Alejandro Cordova}
+\date{10/04/2025}
+
+\newpage
+
+\section{Introducción}
+El \textbf{algoritmo de Dijkstra} (1959) es un método para encontrar el camino más corto desde un nodo origen a todos los demás nodos en un grafo \textbf{con pesos no negativos}. Fue creado por el científico de computación neerlandés \textbf{Edsger W. Dijkstra} y publicado en 1959.
+
+\section{Historia}
+Dijkstra desarrolló este algoritmo mientras trabajaba en el \textbf{Centro Matemático de Ámsterdam}. Originalmente, lo diseñó para demostrar las capacidades de las computadoras ARMAC, pero rápidamente se convirtió en un pilar de la teoría de grafos y las redes de routing (como Internet).
+
+
+\newpage
+\section{Descripción del Algoritmo}
+Dado un grafo $G = (V, E)$ con:
+\begin{itemize}
+    \item $V$: conjunto de vértices (nodos).
+    \item $E$: conjunto de aristas (con pesos $w(e) \geq 0$).
+\end{itemize}
+
+El algoritmo sigue estos pasos:
+\begin{enumerate}
+    \item Inicializar distancias: $d(s) = 0$ (origen) y $d(v) = \infty$ para los demás nodos.
+    \item Seleccionar el nodo con la distancia mínima no procesado.
+    \item Relajar las aristas: actualizar las distancias de los nodos adyacentes.
+    \item Repetir hasta que todos los nodos sean procesados.
+\end{enumerate}
+
+\section{Implementación en Python}
+\subsection{Estructura del Algoritmo}
+El siguiente código implementa Dijkstra usando:
+\begin{itemize}
+    \item \texttt{heapq} para gestión eficiente de colas de prioridad
+    \item Diccionarios para almacenar distancias y predecesores
+\end{itemize}
+
+\begin{lstlisting}[caption=Implementación del Algoritmo de Dijkstra]
+
+import heapq
+
+def dijkstra(graph, start):
+    # Inicializar distancias como infinito
+    distances = {node: float('infinity') for node in graph}
+    distances[start] = 0
+    predecessors = {node: None for node in graph}
+    priority_queue = [(0, start)]
+    
+    while priority_queue:
+        current_distance, current_node = heapq.heappop(priority_queue)
+        if current_distance > distances[current_node]:
+            continue
+        
+        for neighbor, weight in graph[current_node].items():
+            distance = current_distance + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                predecessors[neighbor] = current_node
+                heapq.heappush(priority_queue, (distance, neighbor))
+    
+    return distances, predecessors
+\end{lstlisting}
+
+\subsection{Función Auxiliar}
+\begin{lstlisting}[caption=Reconstrucción del Camino Más Corto]
+def get_shortest_path(predecessors, target):
+    path = []
+    current = target
+    
+    while current is not None:
+        path.append(current)
+        current = predecessors[current]
+    
+    return path[::-1]  # Invertir el camino
+\end{lstlisting}
+
+\section{Ejemplo Práctico}
+\subsection{Grafo de Prueba}
+\begin{lstlisting}[caption=Ejemplo de Grafo]
+graph = {
+    'A': {'B': 5, 'C': 1},
+    'B': {'A': 5, 'C': 2, 'D': 1},
+    'C': {'A': 1, 'B': 2, 'D': 4, 'E': 8},
+    'D': {'B': 1, 'C': 4, 'E': 3, 'F': 6},
+    'E': {'C': 8, 'D': 3},
+    'F': {'D': 6}
+}
+\end{lstlisting}
+
+\subsection{Resultados}
+La ejecución desde el nodo 'A' produciría:
+\begin{verbatim}
+Distancias más cortas desde A:
+A -> A: 0
+A -> B: 3
+A -> C: 1
+A -> D: 4
+A -> E: 7
+A -> F: 10
+
+Camino más corto de A a F: A -> C -> B -> D -> F
+\end{verbatim}
+
+\section{Análisis de Complejidad}
+\begin{itemize}
+    \item \textbf{Tiempo}: $O((V+E) \log V)$ con cola de prioridad
+    \item \textbf{Espacio}: $O(V)$ para almacenar distancias y predecesores
+\end{itemize}
+
+\section{Aplicaciones}
+\begin{itemize}
+    \item Sistemas de navegación (GPS).
+    \item Routing en redes de computadoras.
+    \item Optimización en redes de transporte.
+\end{itemize}
+
+\section{Conclusión}
+El algoritmo de Dijkstra representa un hito fundamental en la teoría de grafos y la computación moderna. A través de este trabajo, hemos demostrado que:
+
+\begin{itemize}
+    \item Su \textbf{elegante diseño greedy} lo hace óptimo para resolver problemas de caminos mínimos en grafos con pesos no negativos, alcanzando una complejidad computacional eficiente de $O((V+E) \log V)$ mediante el uso de colas de prioridad.
+
+    \item La \textbf{versatilidad de sus aplicaciones} abarca desde sistemas de navegación GPS hasta routing en redes de telecomunicaciones, demostrando su relevancia seis décadas después de su publicación.
+
+    \item Nuestra implementación en Python evidenció cómo la combinación de diccionarios y la estructura \texttt{heapq} permite una traducción directa del fundamento matemático a código ejecutable, manteniendo claridad conceptual.
+\end{itemize}
+
+\noindent\textbf{Reflexión final:} Pese a la aparición de alternativas como el algoritmo A* para casos específicos, el legado de Dijkstra persiste como piedra angular en la enseñanza de algoritmos y como herramienta práctica en ingeniería. Su simplicidad conceptual y eficiencia lo mantienen vigente en la era de los macrodatos y las redes complejas, confirmando que los clásicos algorítmicos, cuando están bien diseñados, trascienden las barreras temporales de la tecnología.
+
+\end{document}
